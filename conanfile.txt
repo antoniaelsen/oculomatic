@@ -1,0 +1,7 @@
+[requires]
+boost/1.79.0
+opencv/4.5.5@science/stable
+
+[generators]
+cmake
+make

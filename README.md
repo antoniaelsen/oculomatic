@@ -1,20 +1,38 @@
-# master
-Eye Tracking for point gray cameras
+# Oculomatic
 
-Simple and fast eye tracking for head restrained applications.
+Forked from [Oculomatic-Comedi](https://github.com/oculomatic/oculomatic-comedi)
 
 Tracks pupil location and centroid size.
+Updated to support a variety of cameras with OpenCV.
+Outputs are x and y raw position.
 
-Outputs are x and y raw position over analog voltage outputs via COMEDI (NI DAQ board or similar required).
+## Usage
 
-Performance metrics coming soon.
+### Installation
 
-REQUIRES openCV > 3.0; TBB; BOOST; COMEDI..
+Requires
 
-Build openCV with CXXFLAGS="-ffast-math -march=native" CFLAGS=$CXXFLAGS cmake -D WITH_TBB=ON -D BUILD_NEW_PYTHON_SUPPORT=ON -D WITH_V4L=ON -D INSTALL_C_EXAMPLES=ON -D INSTALL_PYTHON_EXAMPLES=ON -D BUILD_EXAMPLES=ON -D WITH_QT=ON -D WITH_OPENGL=ON -D WITH_VTK=ON ..
+- [cmake](https://cmake.org/)
+- [conan](https://conan.io/) - C++ package manager
+- (Optional)
+  - FlyCapture 2 SDK
+  - Comedi SDK
 
-cmake .
+Run
+
+```
+make install-dependencies
 
 make
 
-Thanks to Bijan Paeseran for the cameras
+make run
+```
+
+**FlyCapture**
+
+To enable FlyCapture cameras, first install the SDK -- see `doc/installation.md`.
+Once FlyCapture is installed, enable FlyCapture in the Oculomatic source with
+
+```
+TODO
+```
