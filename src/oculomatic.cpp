@@ -8,21 +8,6 @@
 #include <random>
 #include <string>
 
-#include <math.h>
-#include <time.h>
-#include <stdio.h>
-#include <sys/socket.h>
-#include <netdb.h>
-#include <fcntl.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <errno.h>
-#include <getopt.h>
-#include <ctype.h>
-#include <string.h>
-#include <assert.h>
-#include <sys/mman.h>
-#include <netdb.h>
 
 #include <boost/circular_buffer.hpp>
 #include <opencv2/core.hpp>
