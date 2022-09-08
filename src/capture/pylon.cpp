@@ -4,8 +4,8 @@
 
 #ifdef USE_PYLON
 
-const bool MONO = false;
-const unsigned int TIMEOUT = 5000;
+const bool MONO = true;
+const unsigned int TIMEOUT = 10;
 const float SCALE = 0.5;
 
 PylonCapture::PylonCapture(unsigned int camera_id) {
@@ -22,7 +22,7 @@ PylonCapture::PylonCapture(unsigned int camera_id) {
       Pylon::CTlFactory::GetInstance().CreateFirstDevice()
     );
     std::cout << "Created Pylon camera for device " << capture->GetDeviceInfo().GetModelName() << std::endl;
-
+    capture->RegisterConfiguration(new Pylon::CSoftwareTriggerConfiguration, Pylon::RegistrationMode_ReplaceAll, Pylon::Cleanup_Delete);
     capture->Open();
 
     GenApi::INodeMap& info = capture->GetNodeMap();
@@ -54,21 +54,25 @@ bool PylonCapture::close() {
 
 bool PylonCapture::ready() {
   if (!capture) return false;
-  return capture->IsOpen();
+  return capture->IsOpen() && capture->CanWaitForFrameTriggerReady();
 }
 
 bool PylonCapture::read(cv::Mat& frame) {
   cv::Mat frame_cv;
   Pylon::CPylonImage frame_pylon;
 
-  bool ok = capture->GrabOne(TIMEOUT, grab, Pylon::TimeoutHandling_ThrowException);
+  capture->StartGrabbing(Pylon::GrabStrategy_LatestImageOnly);
+  bool ready = capture->WaitForFrameTriggerReady(1, Pylon::TimeoutHandling_ThrowException);
+  capture->ExecuteSoftwareTrigger();
+  bool ok = capture->RetrieveResult(TIMEOUT, grab, Pylon::TimeoutHandling_Return);
+  capture->StopGrabbing();
   if (!ok) {
     std::cout
       << "Failed to grab image from pylon camera: "
       << grab->GetErrorCode() << " "
       << grab->GetErrorDescription()
       << std::endl;
-    return false;
+    return ok;
   }
 
   converter.Convert(frame_pylon, grab);

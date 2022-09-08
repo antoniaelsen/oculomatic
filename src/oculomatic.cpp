@@ -128,11 +128,12 @@ int main() {
     timer.start();
 
     bool ok = capture.read(frame);
+    frame_mono = frame;
     if (!ok) {
       std::cout << "Failed to capture frame" << std::endl;
     }
 
-    cv::cvtColor(frame, frame_mono, cv::COLOR_BGR2GRAY);
+    // cv::cvtColor(frame, frame_mono, cv::COLOR_BGR2GRAY);
     // cv::imshow(WINDOW_MAIN, frame_mono);
 
     if (DETECT) {
@@ -156,7 +157,7 @@ int main() {
 
       // Detect blobs
       detector->detect(frame_mono, keypoints);
-      std::cout << "Keypoints: " << keypoints.size() << std::endl;
+      // std::cout << "Keypoints: " << keypoints.size() << std::endl;
 
       cv::Mat frame_annotated;
       cv::drawKeypoints(frame_mono, keypoints, frame_annotated, cv::Scalar(0,0,255), cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS );
