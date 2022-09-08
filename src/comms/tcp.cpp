@@ -1,4 +1,5 @@
 #include "comms/tcp.h"
+#include <cstring>
 
 
 void TcpClient::initialize(const char* hostname, const char* port) {

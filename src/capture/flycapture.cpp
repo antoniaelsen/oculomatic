@@ -1,4 +1,4 @@
-#include "capture/flycapture_capture.h"
+#include "capture/flycapture.h"
 
 #ifdef USE_FLYCAPTURE
 

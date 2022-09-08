@@ -1,18 +1,21 @@
 #ifndef SRC_UTILS_
 #define SRC_UTILS_
 
+#include <chrono>
 #include <string>
-#include <time.h>
+
+using Clock = std::chrono::steady_clock;
+using std::chrono::time_point;
 
 // CStopWatch:
 // A simple timer class with start, stop, and get_duration function calls
 class CStopWatch {
-private:
-  clock_t start_t;
-  clock_t finish_t;
+ private:
+  time_point<Clock> start_t;
+  time_point<Clock> end_t;
 
-public:
-  float get_duration();
+ public:
+  unsigned int get_duration();
   void start();
   void stop();
 };

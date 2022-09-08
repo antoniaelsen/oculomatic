@@ -1,5 +1,5 @@
-#include "capture/opencv_capture.h"
-
+#include "capture/opencv.h"
+#include <iostream>
 
 OpenCvCapture::OpenCvCapture(unsigned int camera_id) {
   capture = std::make_unique<cv::VideoCapture>(camera_id);
@@ -17,6 +17,5 @@ bool OpenCvCapture::ready() {
 }
 
 bool OpenCvCapture::read(cv::Mat& frame) {
-  capture->read(frame);
-  return true;
+  return capture->read(frame);
 }

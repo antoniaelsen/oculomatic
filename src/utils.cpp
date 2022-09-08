@@ -1,19 +1,19 @@
 #include "utils.h"
 #include <iostream>
 #include <string>
-#include <time.h>
 
+using Clock = std::chrono::steady_clock;
 
-float CStopWatch::get_duration() {
-  return (float)(finish_t - start_t) / CLOCKS_PER_SEC;
+unsigned int CStopWatch::get_duration() {
+  return std::chrono::duration_cast<std::chrono::milliseconds>(end_t - start_t).count();
 }
 
 void CStopWatch::start() {
-  start_t = clock();
+  start_t = Clock::now();
 }
 
 void CStopWatch::stop() {
-  finish_t = clock();
+  end_t = Clock::now();
 }
 
 // Returns the current date and time
