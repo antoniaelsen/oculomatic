@@ -75,57 +75,13 @@ bool PylonCapture::read(cv::Mat& frame) {
   size_t cols = frame_pylon.GetWidth();
   size_t rows = frame_pylon.GetHeight();
 
-  std::cout
-    << "frame - "
-    << ", width: " << cols
-    << ", height: " << rows
-    << ", # pixels: " << rows * cols
-    << ", # bytes (expected): " << rows * cols * (MONO ? 1 : 3)
-    << ", # bytes (reported): " << frame_pylon.GetImageSize()
-    << ", pix type: " << std::hex << frame_pylon.GetPixelType() << std::dec
-    << ", pix type (mono8): " << std::hex << Pylon::PixelType_Mono8 << std::dec
-    << ", pix type (bgr8p): " << std::hex << Pylon::PixelType_BGR8packed << std::dec
-    << std::endl;
-
   if (MONO) {
     frame_cv = cv::Mat(rows, cols, CV_8UC1, (uint8_t*)frame_pylon.GetBuffer());
-
-    std::cout << "Pixels Pylon:" << std::endl;
-    for (int i = 0; i < 3; i ++) {
-      Pylon::SPixelData pix_py = frame_pylon.GetPixelData(i, 0);
-        std::cout << "- mono: " << pix_py.Data.Mono << std::endl;
-    }
-
-    std::cout << "Pixels OpenCv:" << std::endl;
-    for (int i = 0; i < 3; i ++) {
-      unsigned int pix_cv = frame_cv.at<uint8_t>(0, i);
-      std::cout << "- mono: " << pix_cv << std::endl;
-    }
-
   } else {
     frame_cv = cv::Mat(rows, cols, CV_8UC3, (uint8_t*)frame_pylon.GetBuffer());
-
-    std::cout << "Pixels Pylon:" << std::endl;
-    for (int i = 0; i < 3; i ++) {
-      Pylon::SPixelData pix_py = frame_pylon.GetPixelData(i, 0);
-      std::cout
-        << "- b: " << pix_py.Data.RGB.B << std::endl
-        << "- g: " << pix_py.Data.RGB.G << std::endl
-        << "- r: " << pix_py.Data.RGB.R << std::endl;
-    }
-
-    std::cout << "Pixels OpenCv:" << std::endl;
-    for (int i = 0; i < 3; i ++) {
-      cv::Vec3b pix_cv = frame_cv.at<cv::Vec3b>(0, i);
-      std::cout
-        << "- b: " << (unsigned int)pix_cv[0] << std::endl
-        << "- g: " << (unsigned int)pix_cv[0] << std::endl
-        << "- r: " << (unsigned int)pix_cv[0] << std::endl;
-    }
   }
 
   cv::resize(frame_cv, frame, capture_size, 0, 0, cv::INTER_AREA);
-  // frame_cv.copyTo(frame);
   return true;
 }
 

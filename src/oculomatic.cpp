@@ -32,7 +32,7 @@ unsigned long int datayl[SAMPLE_CT];
 int MAX_RANGE_X;
 int MAX_RANGE_Y;
 float VIDEO_FPS = 30;
-bool DETECT = false;
+bool DETECT = true;
 
 std::string WINDOW_MAIN = "window";
 std::string WINDOW_CONTROL = "control";
@@ -45,6 +45,7 @@ int main() {
   std::string filename = "output/" + get_file_name();
   std::ofstream save_file((filename + ".csv").c_str());
   cv::Mat frame;
+  cv::Mat frame_mono;
   
   // buffers for heuristic filtering
   boost::circular_buffer<float> buffer_x(4);
@@ -86,7 +87,7 @@ int main() {
   // // Wait for 'c' to be pushed to move on
   // std::cout << "Position eye inside field of view" << std::endl;
   // std::cout << "ROI selection is now done automagically" << std::endl;
-  // std::cout << "press 1 or 2 to mirror image" << std::endl;
+  // std::cout << "press 1 or 2 to mirror frame" << std::endl;
   // std::cout << "press c to continue" << std::endl;
   // while(key != 'c'){
   //   capture.read(frame);
@@ -130,29 +131,9 @@ int main() {
     if (!ok) {
       std::cout << "Failed to capture frame" << std::endl;
     }
-  
-    // std::cout << "rendering" << std::endl;
-    // cv::imshow(WINDOW_MAIN, frame);
-    // std::cout << "rendered" << std::endl;
 
-    cv::Mat image_mono;
-    cv::Mat image = frame;
-    std::cout << "Pixels Frame:" << std::endl;
-    for (int i = 0; i < 3; i ++) {
-      cv::Vec3b pix_cv = frame.at<cv::Vec3b>(0, i);
-      std::cout
-        << "- b: " << (unsigned int)pix_cv[0] << std::endl
-        << "- g: " << (unsigned int)pix_cv[0] << std::endl
-        << "- r: " << (unsigned int)pix_cv[0] << std::endl;
-    }
-    std::cout << "converting" << std::endl;
-    cv::cvtColor(frame, image_mono, cv::COLOR_BGR2GRAY);
-    std::cout << "rendering" << std::endl;
-    cv::imshow(WINDOW_MAIN, image_mono);
-    std::cout << "rendered" << std::endl;
-
-    // cv::flip(image, image, 0);
-    // cv::flip(image_mono, image_mono, 0);
+    cv::cvtColor(frame, frame_mono, cv::COLOR_BGR2GRAY);
+    // cv::imshow(WINDOW_MAIN, frame_mono);
 
     if (DETECT) {
       std::vector<cv::KeyPoint> keypoints;
@@ -174,17 +155,17 @@ int main() {
       cv::Ptr<cv::SimpleBlobDetector> detector = cv::SimpleBlobDetector::create(blobparams_);
 
       // Detect blobs
-      detector->detect(image_mono, keypoints);
+      detector->detect(frame_mono, keypoints);
       std::cout << "Keypoints: " << keypoints.size() << std::endl;
 
-      cv::Mat image_annotated;
-      cv::drawKeypoints(image_mono, keypoints, image_annotated, cv::Scalar(0,0,255), cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS );
+      cv::Mat frame_annotated;
+      cv::drawKeypoints(frame_mono, keypoints, frame_annotated, cv::Scalar(0,0,255), cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS );
 
 
       float pos_x = 0;
       float pos_y = 0;
       if (keypoints.size() > 0){
-        cv::circle(image_annotated, keypoints[0].pt, 3, cv::Scalar(255, 0, 0), -1, 8, 0);
+        cv::circle(frame_annotated, keypoints[0].pt, 3, cv::Scalar(255, 0, 0), -1, 8, 0);
         pos_x = ((keypoints[0].pt.x - (max_x / 2)) / (max_x - params.gain_x)) * (float) MAX_RANGE_X;
         pos_y = ((keypoints[0].pt.y - (max_y / 2)) / (max_y - params.gain_y)) * (float) MAX_RANGE_Y;
         pos_x = pos_x - params.center_offset_x;
@@ -273,14 +254,14 @@ int main() {
 
         // TODO - output to analog voltage
 
-        // Draw image
-        cv::imshow(WINDOW_MAIN, frame);
+        // Draw frame
+        cv::imshow(WINDOW_MAIN, frame_annotated);
       }
     }
 
     // Record the video - this is slow!
     // if (record_video == 1){
-    //   vid.write(image);   
+    //   vid.write(frame);
     // }
   
     timer.stop();
