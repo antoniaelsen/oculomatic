@@ -46,7 +46,7 @@ int main() {
   std::ofstream save_file((filename + ".csv").c_str());
   cv::Mat frame;
   cv::Mat frame_mono;
-  
+
   // buffers for heuristic filtering
   boost::circular_buffer<float> buffer_x(4);
   boost::circular_buffer<float> buffer_y(4);
@@ -128,10 +128,10 @@ int main() {
     timer.start();
 
     bool ok = capture.read(frame);
-    frame_mono = frame;
     if (!ok) {
-      std::cout << "Failed to capture frame" << std::endl;
+      continue;
     }
+    frame_mono = frame;
 
     // cv::cvtColor(frame, frame_mono, cv::COLOR_BGR2GRAY);
     // cv::imshow(WINDOW_MAIN, frame_mono);
@@ -264,7 +264,7 @@ int main() {
     // if (record_video == 1){
     //   vid.write(frame);
     // }
-  
+
     timer.stop();
     unsigned int delay_ms = timer.get_duration();
     float delay_secs = float(delay_ms) / 1000;

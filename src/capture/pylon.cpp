@@ -22,6 +22,7 @@ PylonCapture::PylonCapture(unsigned int camera_id) {
       Pylon::CTlFactory::GetInstance().CreateFirstDevice()
     );
     std::cout << "Created Pylon camera for device " << capture->GetDeviceInfo().GetModelName() << std::endl;
+    capture->StopGrabbing();
     capture->RegisterConfiguration(new Pylon::CSoftwareTriggerConfiguration, Pylon::RegistrationMode_ReplaceAll, Pylon::Cleanup_Delete);
     capture->Open();
 
@@ -32,8 +33,14 @@ PylonCapture::PylonCapture(unsigned int camera_id) {
     unsigned int height = (int)h_ptr->GetValue();
     capture_size = cv::Size(int(float(width) * SCALE), int(float(height) * SCALE));
 
-    std::cout << "Frame dimentions: " << width << " x " << height << std::endl;
-    std::cout << "Rescaled dimentions: " << capture_size.width << " x " << capture_size.height << std::endl;
+    std::cout << " - Frame dimensions: " << width << " x " << height << std::endl;
+    std::cout << " - Rescaled dimensions: " << capture_size.width << " x " << capture_size.height << std::endl;
+
+    Pylon::CFloatParameter gain(info, "Gain");
+
+    std::cout << " - Exposure: " << gain.GetValue() << std::endl;
+    std::cout << " - Gain: " << gain.GetValue() << std::endl;
+    capture->StartGrabbing(Pylon::GrabStrategy_LatestImageOnly);
 
   } catch (const Pylon::GenericException& e) {
     std::cout << "Failed to create Pylon camera - " << e.what() << std::endl;
@@ -41,13 +48,15 @@ PylonCapture::PylonCapture(unsigned int camera_id) {
 }
 
 PylonCapture::~PylonCapture() {
-  if (capture) {
-    capture->Close();
-  }
   close();
 }
 
 bool PylonCapture::close() {
+  if (capture) {
+    std::cout << "PylonCapture: closing camera";
+    capture->StopGrabbing();
+    capture->Close();
+  }
   Pylon::PylonTerminate();
   return true;
 }
@@ -61,19 +70,13 @@ bool PylonCapture::read(cv::Mat& frame) {
   cv::Mat frame_cv;
   Pylon::CPylonImage frame_pylon;
 
-  capture->StartGrabbing(Pylon::GrabStrategy_LatestImageOnly);
-  bool ready = capture->WaitForFrameTriggerReady(1, Pylon::TimeoutHandling_ThrowException);
+  bool ready = capture->WaitForFrameTriggerReady(1, Pylon::TimeoutHandling_Return);
+  if (!ready) return false;
+
   capture->ExecuteSoftwareTrigger();
-  bool ok = capture->RetrieveResult(TIMEOUT, grab, Pylon::TimeoutHandling_Return);
-  capture->StopGrabbing();
-  if (!ok) {
-    std::cout
-      << "Failed to grab image from pylon camera: "
-      << grab->GetErrorCode() << " "
-      << grab->GetErrorDescription()
-      << std::endl;
-    return ok;
-  }
+  bool ok = capture->RetrieveResult(0, grab, Pylon::TimeoutHandling_Return);
+
+  if (!ok) return false;
 
   converter.Convert(frame_pylon, grab);
   size_t cols = frame_pylon.GetWidth();
