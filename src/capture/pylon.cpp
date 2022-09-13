@@ -4,7 +4,7 @@
 
 #ifdef USE_PYLON
 
-const bool MONO = true;
+const bool MONO = false;
 const unsigned int TIMEOUT = 10;
 const float SCALE = 0.5;
 
